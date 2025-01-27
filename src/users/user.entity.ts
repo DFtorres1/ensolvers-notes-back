@@ -1,6 +1,6 @@
 import { BaseEntity } from 'src/base.entity';
 import { Note } from 'src/notes/note.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class User extends BaseEntity {
@@ -10,7 +10,7 @@ export class User extends BaseEntity {
   @Column()
   lastName: string;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
