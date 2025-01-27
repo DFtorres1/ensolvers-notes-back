@@ -34,7 +34,7 @@ export class NotesController {
     @Headers('authorization') authHeader: string,
     @Body() createNoteDto: CreateNoteDto,
   ): Promise<void> {
-    this.notesService.create(authHeader, createNoteDto);
+    await this.notesService.create(authHeader, createNoteDto);
   }
 
   @Put(':id')
@@ -43,7 +43,7 @@ export class NotesController {
     @Param('id') id: number,
     @Body() createNoteDto: UpdateNoteDto,
   ): Promise<void> {
-    this.notesService.update(authHeader, id, createNoteDto);
+    await this.notesService.update(authHeader, id, createNoteDto);
   }
 
   @Delete(':id')

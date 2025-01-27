@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { User } from '../user.entity';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
+import { TokenInterface } from '../interfaces/token.interface';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,7 @@ export class AuthService {
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<any | null> {
+  async login(loginDto: LoginDto): Promise<{ token: string } | null> {
     const { username, password } = loginDto;
     const user = await this.usersRepository.findOneBy({ username });
 
@@ -29,7 +30,7 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect password');
     }
 
-    const token = sign({ userId: user?.id }, 'super-secret-key', {
+    const token: string = sign({ userId: user?.id }, 'super-secret-key', {
       expiresIn: '1h',
     });
 
@@ -67,12 +68,15 @@ export class AuthService {
       throw new NotFoundException('Authorization token not found');
     }
 
-    const decodedToken = decode(token) as { userId: number };
-    const userId = decodedToken?.userId;
-
-    if (!userId) {
+    const decodedToken: TokenInterface | null = decode(
+      token,
+    ) as TokenInterface | null;
+    
+    if (!decodedToken || !decodedToken.userId) {
       throw new NotFoundException('Invalid token: userId not found');
     }
+
+    const userId: number = decodedToken.userId;
 
     const user = await this.usersRepository.findOneBy({ id: userId });
 
