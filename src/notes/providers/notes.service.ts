@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from '../note.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsOrderValue, Repository } from 'typeorm';
+import { decode } from 'jsonwebtoken';
 import { CreateNoteDto } from '../dto/create-note.dto';
 import { User } from 'src/users/user.entity';
 import { UpdateNoteDto } from '../dto/update-note.dto';
@@ -13,8 +18,44 @@ export class NotesService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  findAll(): Promise<Note[]> {
-    return this.noteRepository.find();
+  async findAll(
+    authHeader: string,
+    order: FindOptionsOrderValue,
+    orderBy: string,
+    archiveView: string,
+  ): Promise<Note[]> {
+    if (!order || !orderBy || !archiveView) {
+      throw new NotFoundException('Parameters not found');
+    }
+    const archiveViewBoolean = archiveView === 'true';
+
+    if (!authHeader || !authHeader.startsWith('Bearer')) {
+      throw new NotAcceptableException('Header not allowed');
+    }
+
+    const tokenMatch = authHeader.match(/^Bearer\s+(\S+)$/);
+    const token = tokenMatch ? tokenMatch[1] : null;
+
+    if (!token) {
+      throw new NotFoundException('Token not found');
+    }
+
+    const decodedToken = decode(token);
+
+    const userId = decodedToken.userId;
+
+    const user = await this.userRepository.findOneBy({
+      id: userId,
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.noteRepository.find({
+      order: { id: order },
+      where: { isActive: !archiveViewBoolean, user: { id: user.id } },
+    });
   }
 
   findOne(id: number): Promise<Note | null> {
@@ -22,6 +63,10 @@ export class NotesService {
   }
 
   async create(createNoteDto: CreateNoteDto): Promise<void> {
+    if (!createNoteDto.userId) {
+      throw new NotFoundException('Not user provided');
+    }
+
     const user = await this.userRepository.findOneBy({
       id: createNoteDto.userId,
     });
