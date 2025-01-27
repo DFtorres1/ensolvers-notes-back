@@ -1,21 +1,16 @@
-import {
-  Injectable,
-  NotAcceptableException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from '../note.entity';
 import { FindOptionsOrderValue, Repository } from 'typeorm';
-import { decode } from 'jsonwebtoken';
 import { CreateNoteDto } from '../dto/create-note.dto';
-import { User } from 'src/users/user.entity';
 import { UpdateNoteDto } from '../dto/update-note.dto';
+import { AuthService } from 'src/users/providers/auth.service';
 
 @Injectable()
 export class NotesService {
   constructor(
     @InjectRepository(Note) private noteRepository: Repository<Note>,
-    @InjectRepository(User) private userRepository: Repository<User>,
+    private authService: AuthService,
   ) {}
 
   async findAll(
@@ -29,28 +24,7 @@ export class NotesService {
     }
     const archiveViewBoolean = archiveView === 'true';
 
-    if (!authHeader || !authHeader.startsWith('Bearer')) {
-      throw new NotAcceptableException('Header not allowed');
-    }
-
-    const tokenMatch = authHeader.match(/^Bearer\s+(\S+)$/);
-    const token = tokenMatch ? tokenMatch[1] : null;
-
-    if (!token) {
-      throw new NotFoundException('Token not found');
-    }
-
-    const decodedToken = decode(token);
-
-    const userId = decodedToken.userId;
-
-    const user = await this.userRepository.findOneBy({
-      id: userId,
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.authService.getUserFromAuthHeader(authHeader);
 
     return this.noteRepository.find({
       order: { id: order },
@@ -58,18 +32,11 @@ export class NotesService {
     });
   }
 
-  findOne(id: number): Promise<Note | null> {
-    return this.noteRepository.findOneBy({ id });
-  }
-
-  async create(createNoteDto: CreateNoteDto): Promise<void> {
-    if (!createNoteDto.userId) {
-      throw new NotFoundException('Not user provided');
-    }
-
-    const user = await this.userRepository.findOneBy({
-      id: createNoteDto.userId,
-    });
+  async create(
+    authHeader: string,
+    createNoteDto: CreateNoteDto,
+  ): Promise<void> {
+    const user = await this.authService.getUserFromAuthHeader(authHeader);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -84,7 +51,11 @@ export class NotesService {
     await this.noteRepository.save(note);
   }
 
-  async update(id: number, updateNoteDto: UpdateNoteDto): Promise<void> {
+  async update(
+    authHeader: string,
+    id: number,
+    updateNoteDto: UpdateNoteDto,
+  ): Promise<void> {
     const { title, content, isActive } = updateNoteDto;
     await this.noteRepository.update(id, {
       title,
@@ -93,7 +64,7 @@ export class NotesService {
     });
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(authHeader: string, id: number): Promise<void> {
     await this.noteRepository.delete(id);
   }
 }

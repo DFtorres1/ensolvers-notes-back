@@ -29,29 +29,28 @@ export class NotesController {
     return this.notesService.findAll(authHeader, order, orderBy, archiveView);
   }
 
-  @Get(':id')
-  async findOne(
-    @Headers('authorization') authHeader: string,
-    @Param('id') id: number,
-  ): Promise<Note | null> {
-    return this.notesService.findOne(id);
-  }
-
   @Post()
-  async createNote(@Body() createNoteDto: CreateNoteDto): Promise<void> {
-    this.notesService.create(createNoteDto);
+  async createNote(
+    @Headers('authorization') authHeader: string,
+    @Body() createNoteDto: CreateNoteDto,
+  ): Promise<void> {
+    this.notesService.create(authHeader, createNoteDto);
   }
 
   @Put(':id')
   async updateNote(
+    @Headers('authorization') authHeader: string,
     @Param('id') id: number,
     @Body() createNoteDto: UpdateNoteDto,
   ): Promise<void> {
-    this.notesService.update(id, createNoteDto);
+    this.notesService.update(authHeader, id, createNoteDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
-    return this.notesService.remove(id);
+  async remove(
+    @Headers('authorization') authHeader: string,
+    @Param('id') id: number,
+  ): Promise<void> {
+    return this.notesService.remove(authHeader, id);
   }
 }

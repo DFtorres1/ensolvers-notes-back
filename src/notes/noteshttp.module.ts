@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { NotesModule } from './notes.module';
 import { NotesService } from './providers/notes.service';
 import { NotesController } from './controllers/notes.controller';
-import { UsersModule } from 'src/users/users.module';
+import { UsersHttpModule } from 'src/users/usershttp.module';
 
 @Module({
-  imports: [NotesModule, UsersModule],
+  imports: [NotesModule, UsersHttpModule],
   controllers: [NotesController],
   providers: [NotesService],
 })
