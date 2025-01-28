@@ -41,9 +41,9 @@ export class NotesController {
   async updateNote(
     @Headers('authorization') authHeader: string,
     @Param('id') id: number,
-    @Body() createNoteDto: UpdateNoteDto,
+    @Body() updateNoteDto: UpdateNoteDto,
   ): Promise<void> {
-    await this.notesService.update(authHeader, id, createNoteDto);
+    await this.notesService.update(authHeader, id, updateNoteDto);
   }
 
   @Delete(':id')

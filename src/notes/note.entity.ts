@@ -1,6 +1,7 @@
 import { BaseEntity } from 'src/base.entity';
 import { User } from 'src/users/user.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Tag } from './tag.entity';
 
 @Entity()
 export class Note extends BaseEntity {
@@ -15,4 +16,7 @@ export class Note extends BaseEntity {
 
   @Column({ default: true, type: 'boolean' })
   isActive: boolean;
+
+  @OneToMany(() => Tag, (tag) => tag.note, { cascade: true })
+  tags?: Tag[];
 }
