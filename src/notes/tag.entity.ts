@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/base.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 import { Note } from './note.entity';
 import { User } from 'src/users/user.entity';
 
@@ -11,9 +11,10 @@ export class Tag extends BaseEntity {
   @Column({ nullable: true })
   color?: string;
 
-  @ManyToOne(() => Note, (note) => note.tags, { nullable: true })
-  note?: Note;
-  
+  @ManyToMany(() => Note, { nullable: true })
+  @JoinTable()
+  notes?: Note[];
+
   @ManyToOne(() => User, (user) => user.tags)
   user: User;
 }
