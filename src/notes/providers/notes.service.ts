@@ -104,9 +104,15 @@ export class NotesService {
       }
     }
 
-    title && (note.title = title);
-    content && (note.content = content);
-    isActive && (note.isActive = isActive);
+    if (title) {
+      note.title = title;
+    }
+    if (content) {
+      note.content = content;
+    }
+    if (isActive) {
+      note.isActive = isActive;
+    }
     if (note.tags) {
       note.tags = [...note.tags, ...tags];
     } else {

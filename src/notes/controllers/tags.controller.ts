@@ -24,7 +24,6 @@ export class TagsController {
     @Headers('authorization') authHeader: string,
     @Query('order') order: FindOptionsOrderValue,
     @Query('orderBy') orderBy: string,
-    @Query('archiveView') archiveView: string,
   ): Promise<Tag[]> {
     return this.tagsService.findAll(authHeader, order, orderBy);
   }

@@ -71,7 +71,7 @@ export class AuthService {
     const decodedToken: TokenInterface | null = decode(
       token,
     ) as TokenInterface | null;
-    
+
     if (!decodedToken || !decodedToken.userId) {
       throw new NotFoundException('Invalid token: userId not found');
     }

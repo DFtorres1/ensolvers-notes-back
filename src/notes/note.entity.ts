@@ -1,6 +1,12 @@
 import { BaseEntity } from 'src/base.entity';
 import { User } from 'src/users/user.entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+} from 'typeorm';
 import { Tag } from './tag.entity';
 
 @Entity()
