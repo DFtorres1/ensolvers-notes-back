@@ -84,6 +84,7 @@ export class NotesService {
 
     const note = await this.noteRepository.findOne({
       where: {
+        id: id,
         user: { id: user.id },
       },
       relations: ['tags'],
@@ -122,11 +123,13 @@ export class NotesService {
       throw new NotFoundException('User not found');
     }
 
-    const notes = await this.noteRepository.find({
-      where: { user: { id: user.id } },
+    const note = await this.noteRepository.findOne({
+      where: {
+        user: { id: user.id },
+      },
     });
 
-    if (!notes.some((note) => note.id === id)) {
+    if (!note) {
       throw new NotFoundException('Note does not belong to provided user');
     }
 
